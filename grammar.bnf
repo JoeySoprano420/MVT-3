@@ -1,0 +1,51 @@
+<trizzle_program> ::= ("Main" | "Prog") "(" ")" <block> ("end" | "run")
+
+<block> ::= "{" { <statement> } "}"
+
+<statement> ::= <declaration>
+               | <assignment>
+               | <print_stmt>
+               | <if_stmt>
+               | <loop_stmt>
+               | <async_stmt>
+               | <try_catch_stmt>
+               | <expr> ";"
+
+<declaration> ::= "let" IDENTIFIER "=" <expr>
+
+<assignment> ::= IDENTIFIER "=" <expr>
+
+<print_stmt> ::= "Print" "[" STRING_LITERAL "]"
+               | "Display" "[" STRING_LITERAL "]"
+
+<if_stmt> ::= "if" <expr> <block> { "elseif" <expr> <block> } [ "else" <block> ]
+
+<loop_stmt> ::= "loop" "(" IDENTIFIER "from" <expr> "to" <expr> ")" <block>
+
+<async_stmt> ::= "async" "routine" <block>
+<await_stmt> ::= "await" IDENTIFIER
+
+<try_catch_stmt> ::= "try" <block> "catch" <block>
+
+<expr> ::= <term> { ("+" | "-") <term> }
+<term> ::= <factor> { ("*" | "/") <factor> }
+<factor> ::= INT_LITERAL | FLOAT_LITERAL | STRING_LITERAL | BOOL_LITERAL | IDENTIFIER | "(" <expr> ")"
+
+<veil_program> ::= "Task" "{" <intention_decl> <tool_decl> <logic_decl> "}"
+
+<intention_decl> ::= "Intention:" IDENTIFIER [ "(" <param_list> ")" ] ";"
+<tool_decl>      ::= "Tool:" IDENTIFIER ";"
+<logic_decl>     ::= "Logic:" "{" { <logic_stmt> } "};"
+
+<param_list> ::= <param> { "," <param> }
+<param>      ::= <type> IDENTIFIER
+
+<type> ::= "Int" | "Float" | "Bool" | "String"
+
+<logic_stmt> ::= "Return:" <expr> ";"
+               | "Print:" STRING_LITERAL ";"
+               | "Get:" IDENTIFIER ";"
+               | "Set:" IDENTIFIER "=" <expr> ";"
+               | <trizzle_stmt_in_logic>
+
+<trizzle_stmt_in_logic> ::= <declaration> | <assignment> | <if_stmt> | <loop_stmt>
