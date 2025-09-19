@@ -894,3 +894,192 @@ def op_setno_al(vm, opcode):
     vm.registers["EAX"] = (vm.registers["EAX"] & 0xFFFFFF00) | (1 if vm.flags["OF"] == 0 else 0)
     return f"SETNO AL → AL={vm.registers['EAX'] & 0xFF}"
 
+# ------------------------------
+# Dispatcher Table
+# ------------------------------
+OPCODE_EXECUTORS = {
+    # Memory / No-ops
+    0x00: op_nop,
+
+    # Arithmetic
+    0x0B: op_add_eax_ebx,
+    0x0C: op_sub_eax_ebx,
+    0x0D: op_mul_eax_ebx,
+    0x0E: op_imul_eax_ebx,
+    0x0F: op_div_eax_ebx,
+    0x10: op_idiv_eax_ebx,
+    0x11: op_inc_eax,
+    0x12: op_dec_eax,
+
+    # Logic
+    0x1B: op_and_eax_ebx,
+    0x1C: op_or_eax_ebx,
+    0x1D: op_xor_eax_ebx,
+    0x1E: op_not_eax,
+    0x1F: op_shl_eax,
+    0x20: op_shr_eax,
+    0x21: op_sar_eax,
+
+    # Control Flow
+    0x2E: op_jmp_rel8,
+    0x2F: op_jmp_rel32,
+    0x30: op_call_rel32,
+    0x31: op_call_rm32,
+    0x32: op_ret,
+    0x33: op_ret_imm16,
+    0x34: op_int,
+    0x35: op_int3,
+    0x36: lambda vm, op: op_jcc(vm, op, cond_zf),
+    0x37: lambda vm, op: op_jcc(vm, op, cond_nz),
+    0x38: lambda vm, op: op_jcc(vm, op, cond_sf),
+    0x39: lambda vm, op: op_jcc(vm, op, cond_ns),
+    0x3A: lambda vm, op: op_jcc(vm, op, cond_of),
+    0x3B: lambda vm, op: op_jcc(vm, op, cond_no),
+    0x3C: lambda vm, op: op_jcc(vm, op, cond_cf),
+    0x3D: lambda vm, op: op_jcc(vm, op, cond_nc),
+
+    # Terminators
+    0x40: op_hlt,
+    0x41: op_cmc,
+    0x42: op_clc,
+    0x43: op_stc,
+    0x44: op_cli,
+    0x45: op_sti,
+    0x46: op_cld,
+    0x47: op_std,
+    0x48: op_iret,
+    0x49: op_loop,
+    0x4A: op_loope,
+    0x4B: op_loopne,
+
+    # Language Ops (MOV, PUSH, POP, String, Flags, CMP, XCHG, SETcc, etc.)
+    0x54: op_mov_imm_eax,
+    0x55: op_mov_r32_rm32,
+    0x56: op_mov_rm32_r32,
+    0x57: op_push_ecx,
+    0x58: op_pop_ecx,
+    0x59: op_push_edx,
+    0x5A: op_pop_edx,
+    0x5B: op_push_ebx,
+    0x5C: op_pop_ebx,
+    0x5D: op_push_eax,
+    0x5E: op_pop_eax,
+    0x5F: op_push_ebp,
+    0x60: op_pop_ebp,
+    0x61: op_push_esi,
+    0x62: op_pop_esi,
+    0x63: op_push_edi,
+    0x64: op_pop_edi,
+
+    0x65: op_int,
+    0x66: op_int3,
+    0x67: op_ret,
+    0x68: op_ret_imm16,
+    0x69: op_stosb,
+    0x6A: op_stosd,
+    0x6B: op_test_al_imm8,
+    0x6C: op_test_eax_imm32,
+    0x6D: op_test_rm8_r8,
+    0x6E: op_test_rm32_r32,
+    0x6F: op_inc_edi,
+    0x70: op_dec_ecx,
+    0x71: op_push_rm32,
+    0x72: op_pop_rm32,
+    0x73: op_call_rel32,
+    0x74: op_jmp_rm32,
+    0x75: op_jmp_rel8,
+    0x76: op_jmp_rel32,
+    0x77: op_jne_rel8,
+    0x78: op_je_rel8,
+
+    # Conditional jumps (more)
+    0x79: op_jl_rel8,
+    0x7A: op_jle_rel8,
+    0x7B: op_jg_rel8,
+    0x7C: op_jge_rel8,
+    0x7D: op_jp_rel8,
+    0x7E: op_jnp_rel8,
+    0x7F: op_jo_rel8,
+    0x80: op_jno_rel8,
+    0x81: op_js_rel8,
+    0x82: op_jns_rel8,
+    0x83: op_jbe_rel8,
+    0x84: op_ja_rel8,
+    0x85: op_jz_rel8,
+    0x86: op_jnz_rel8,
+    0x87: op_jb_rel8,
+    0x88: op_jae_rel8,
+
+    # Flags ops
+    0x94: op_pushf,
+    0x95: op_popf,
+    0x96: op_sahf,
+    0x97: op_lahf,
+    0x98: op_cbw,
+    0x99: op_cwd,
+    0x9A: op_callf,
+    0x9B: op_wait,
+    0x9C: op_movsb,
+    0x9D: op_movsd,
+    0x9E: op_cmpsb,
+    0x9F: op_cmpsd,
+    0xA0: op_lodsb,
+    0xA1: op_lodsd,
+    0xA2: op_scasb,
+    0xA3: op_scasd,
+
+    # XCHG / CMP / MUL / DIV
+    0xA4: op_xchg_eax_esp,
+    0xA5: op_xchg_eax_ebp,
+    0xA6: op_xchg_eax_esi,
+    0xA7: op_xchg_eax_edi,
+    0xA8: op_cmp_rm32_imm32,
+    0xA9: op_cmp_rm32_r32,
+    0xAA: op_mul_rm32,
+    0xAB: op_imul_rm32,
+    0xAC: op_div_rm32,
+    0xAD: op_idiv_rm32,
+
+    # SETcc
+    0xB4: op_sete_al,
+    0xB5: op_setne_al,
+    0xB6: op_setl_al,
+    0xB7: op_setge_al,
+    0xB8: op_setg_al,
+    0xB9: op_setle_al,
+    0xBA: op_seto_al,
+    0xBB: op_setno_al,
+}
+
+# ------------------------------
+# CLI
+# ------------------------------
+def main():
+    parser = argparse.ArgumentParser(description="DGM opcode executor VM", add_help=True)
+    parser.add_argument("opcodes", nargs="*", help="Opcodes to execute (e.g., 0x0B 0x5D 0x40)")
+    parser.add_argument("--dump-state", action="store_true", help="Dump VM state after execution")
+    parser.add_argument("--trace", action="store_true", help="Trace execution step-by-step")
+    parser.add_argument("--version", action="store_true", help="Show version and exit")
+
+    args = parser.parse_args()
+    if args.version:
+        print("executor.py", version_string())
+        return
+
+    ex = Executor(trace=args.trace)
+
+    for token in args.opcodes:
+        try:
+            opcode = int(token, 16)
+            result = ex.execute(opcode)
+            print(color(f"{token}: {result}", Fore.GREEN))
+            if ex.vm.halted:
+                break
+        except ValueError:
+            print(color(f"Invalid opcode: {token}", Fore.RED))
+
+    if args.dump_state:
+        print(json.dumps(ex.vm.dump_state(), indent=4))
+
+if __name__ == "__main__":
+    main()
