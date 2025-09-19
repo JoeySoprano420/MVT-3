@@ -133,3 +133,17 @@ class Async(ASTNode):
     def __init__(self, body: List[ASTNode], name: Optional[str] = None):
         self.body = body
         self.name = name
+
+# ast_nodes.py additions
+
+class Declaration(ASTNode):
+    def __init__(self, name, expr: 'Expr'):
+        # name can be str or list of str for tuple destructuring
+        self.name = name
+        self.expr = expr
+
+class Assignment(ASTNode):
+    def __init__(self, name, expr: 'Expr'):
+        # same: str or list of str
+        self.name = name
+        self.expr = expr
