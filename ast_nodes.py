@@ -126,3 +126,10 @@ class Async(ASTNode):
     def __init__(self, body: List[ASTNode], name: Optional[str] = None):
         self.body = body
         self.name = name  # new: task identifier
+
+# ast_nodes.py (already has Return node — no change needed)
+# Just ensure Async nodes can carry body statements that include Return.
+class Async(ASTNode):
+    def __init__(self, body: List[ASTNode], name: Optional[str] = None):
+        self.body = body
+        self.name = name
