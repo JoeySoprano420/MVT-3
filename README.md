@@ -1,7 +1,3 @@
-Perfect. Here’s the **complete first-pass BNF grammar + token set** for **MIPA VEIL Trizzle (MVT 3)**, covering **both Trizzle-style execution mode** and **Veil-style declarative mode**. This can serve as the direct blueprint for building the **lexer** and **parser**.
-
----
-
 # 📝 MVT 3 Grammar Specification
 
 ---
