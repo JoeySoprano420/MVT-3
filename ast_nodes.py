@@ -155,3 +155,9 @@ class DestructureSlot(ASTNode):
         self.name = name
         self.default = default
 
+# ast_nodes.py addition
+
+class RestSlot(ASTNode):
+    def __init__(self, name: str):
+        self.name = name
+
