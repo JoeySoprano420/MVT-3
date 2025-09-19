@@ -31,21 +31,3 @@
 <term> ::= <factor> { ("*" | "/") <factor> }
 <factor> ::= INT_LITERAL | FLOAT_LITERAL | STRING_LITERAL | BOOL_LITERAL | IDENTIFIER | "(" <expr> ")"
 
-<veil_program> ::= "Task" "{" <intention_decl> <tool_decl> <logic_decl> "}"
-
-<intention_decl> ::= "Intention:" IDENTIFIER [ "(" <param_list> ")" ] ";"
-<tool_decl>      ::= "Tool:" IDENTIFIER ";"
-<logic_decl>     ::= "Logic:" "{" { <logic_stmt> } "};"
-
-<param_list> ::= <param> { "," <param> }
-<param>      ::= <type> IDENTIFIER
-
-<type> ::= "Int" | "Float" | "Bool" | "String"
-
-<logic_stmt> ::= "Return:" <expr> ";"
-               | "Print:" STRING_LITERAL ";"
-               | "Get:" IDENTIFIER ";"
-               | "Set:" IDENTIFIER "=" <expr> ";"
-               | <trizzle_stmt_in_logic>
-
-<trizzle_stmt_in_logic> ::= <declaration> | <assignment> | <if_stmt> | <loop_stmt>
