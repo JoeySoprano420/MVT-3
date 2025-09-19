@@ -169,3 +169,17 @@ class AliasSlot(ASTNode):
         self.alias = alias
         self.default = default
 
+# ast_nodes.py additions
+
+class ObjectSlot(ASTNode):
+    def __init__(self, key: str, name: Optional[str] = None,
+                 alias: Optional[str] = None, default: Optional['Expr'] = None):
+        self.key = key              # key in the object
+        self.name = name or key     # variable name bound
+        self.alias = alias          # optional alias
+        self.default = default      # default expression
+
+class ObjectPattern(ASTNode):
+    def __init__(self, slots: list[ObjectSlot]):
+        self.slots = slots
+
