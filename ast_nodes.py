@@ -147,3 +147,11 @@ class Assignment(ASTNode):
         # same: str or list of str
         self.name = name
         self.expr = expr
+
+# ast_nodes.py addition
+
+class DestructureSlot(ASTNode):
+    def __init__(self, name: str, default: Optional['Expr'] = None):
+        self.name = name
+        self.default = default
+
