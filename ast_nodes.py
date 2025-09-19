@@ -120,3 +120,9 @@ class Identifier(Expr):
     def __init__(self, name: str):
         self.name = name
 
+# ast_nodes.py (extend Async)
+
+class Async(ASTNode):
+    def __init__(self, body: List[ASTNode], name: Optional[str] = None):
+        self.body = body
+        self.name = name  # new: task identifier
