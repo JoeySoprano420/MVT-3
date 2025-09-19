@@ -183,3 +183,25 @@ class ObjectPattern(ASTNode):
     def __init__(self, slots: list[ObjectSlot]):
         self.slots = slots
 
+class AsyncLambda(ASTNode):
+    def __init__(self, params, body):
+        self.params = params    # destructuring patterns
+        self.body = body        # body statements
+
+class AsyncRoutine(ASTNode):
+    def __init__(self, name, params, body):
+        self.name = name
+        self.params = params   # list of patterns
+        self.body = body       # list of ASTNodes
+
+class Routine(ASTNode):
+    def __init__(self, name, params, body):
+        self.name = name
+        self.params = params   # list of patterns (Identifier, list, ObjectPattern, etc.)
+        self.body = body       # list of ASTNodes
+
+class Call(ASTNode):
+    def __init__(self, name, args):
+        self.name = name
+        self.args = args       # list of Expr
+
