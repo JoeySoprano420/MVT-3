@@ -161,3 +161,11 @@ class RestSlot(ASTNode):
     def __init__(self, name: str):
         self.name = name
 
+# ast_nodes.py addition
+
+class AliasSlot(ASTNode):
+    def __init__(self, name: str, alias: str, default: Optional['Expr'] = None):
+        self.name = name
+        self.alias = alias
+        self.default = default
+
